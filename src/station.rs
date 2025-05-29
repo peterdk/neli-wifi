@@ -29,6 +29,11 @@ pub struct Station {
     pub tx_packets: Option<u32>,
     /// Total retries (MPDUs) to this station
     pub tx_retries: Option<u32>,
+
+    pub ht_mcs: Option<u8>,
+    pub vht_mcs: Option<u8>,
+    pub he_mcs: Option<u8>,
+    pub eht_mcs: Option<u8>,
 }
 
 impl TryFrom<Attrs<'_, Nl80211Attr>> for Station {
@@ -78,6 +83,21 @@ impl TryFrom<Attrs<'_, Nl80211Attr>> for Station {
                             .get_attribute(Nl80211RateInfo::RateInfoBitrate32)
                         {
                             res.tx_bitrate = Some(rate.get_payload_as()?);
+                        }
+                        let rate_info = attr
+                            .get_attr_handle::<Nl80211RateInfo>()?;
+
+                        if let Some(ht_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoMcs) {
+                            res.ht_mcs = Some(ht_mcs.get_payload_as()?);
+                        }
+                        if let Some(vht_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoVhtMcs) {
+                            res.vht_mcs = Some(vht_mcs.get_payload_as()?);
+                        }
+                        if let Some(he_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoHeMcs) {
+                            res.ht_mcs = Some(he_mcs.get_payload_as()?);
+                        }
+                        if let Some(eht_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoEhtMcs) {
+                            res.eht_mcs = Some(eht_mcs.get_payload_as()?);
                         }
                     }
                     _ => (),
@@ -231,6 +251,10 @@ mod tests_station {
             tx_failed: Some(u32::from_le_bytes([47, 0, 0, 0])),
             tx_packets: Some(u32::from_le_bytes([9, 170, 2, 0])),
             tx_retries: Some(u32::from_le_bytes([27, 130, 0, 0])),
+            ht_mcs: Some(13u8),
+            he_mcs: None,
+            vht_mcs: None,
+            eht_mcs: None
         };
 
         assert_eq!(station, expected_station)
