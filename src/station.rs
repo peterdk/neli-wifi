@@ -84,21 +84,31 @@ impl TryFrom<Attrs<'_, Nl80211Attr>> for Station {
                         {
                             res.tx_bitrate = rate.get_payload_as().ok();
                         }
-                        let rate_info = attr
-                            .get_attr_handle::<Nl80211RateInfo>()?;
-
-                        if let Some(ht_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoMcs) {
+                        if let Some(ht_mcs) = attr
+                            .get_attr_handle::<Nl80211RateInfo>()?
+                            .get_attribute(Nl80211RateInfo::RateInfoMcs)
+                        {
                             res.ht_mcs = ht_mcs.get_payload_as().ok();
                         }
-                        if let Some(vht_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoVhtMcs) {
+                        if let Some(he_mcs) = attr
+                            .get_attr_handle::<Nl80211RateInfo>()?
+                            .get_attribute(Nl80211RateInfo::RateInfoHeMcs)
+                        {
+                            res.he_mcs = he_mcs.get_payload_as().ok();
+                        }
+                        if let Some(vht_mcs) = attr
+                            .get_attr_handle::<Nl80211RateInfo>()?
+                            .get_attribute(Nl80211RateInfo::RateInfoVhtMcs)
+                        {
                             res.vht_mcs = vht_mcs.get_payload_as().ok();
                         }
-                        if let Some(he_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoHeMcs) {
-                            res.ht_mcs = he_mcs.get_payload_as().ok();
-                        }
-                        if let Some(eht_mcs) = rate_info.get_attribute(Nl80211RateInfo::RateInfoEhtMcs) {
+                        if let Some(eht_mcs) = attr
+                            .get_attr_handle::<Nl80211RateInfo>()?
+                            .get_attribute(Nl80211RateInfo::RateInfoEhtMcs)
+                        {
                             res.eht_mcs = eht_mcs.get_payload_as().ok();
                         }
+                      
                     }
                     _ => (),
                 }
